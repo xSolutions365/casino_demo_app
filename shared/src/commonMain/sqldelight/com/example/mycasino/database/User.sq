@@ -1,0 +1,28 @@
+CREATE TABLE UserEntity (
+    id TEXT NOT NULL PRIMARY KEY,
+    username TEXT NOT NULL,
+    email TEXT NOT NULL
+);
+
+-- Fetch all users from the database
+selectAllUsers:
+SELECT * FROM UserEntity;
+
+-- Find a specific user by their email address (Crucial for the Login check!)
+findUserByEmail:
+SELECT * FROM UserEntity
+WHERE email = ?;
+
+-- Find a specific user by their numerical ID
+findUserById:
+SELECT * FROM UserEntity
+WHERE id = ?;
+
+-- Insert a new user session or overwrite an existing one
+insertUser:
+INSERT OR REPLACE INTO UserEntity(id, username, email)
+VALUES (?, ?, ?);
+
+-- Delete a specific user profile by ID
+deleteUser:
+DELETE FROM UserEntity WHERE id = ?;

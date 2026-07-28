@@ -55,7 +55,9 @@ fun MainNavigation() {
                 LobbyScreen(
                     username = username,
                     onCardClick = { cardId -> },
-                    onLogout = {}
+                    onLogout = {
+                        navController.popBackStack<LoginScreen>(inclusive = false)
+                    }
                 )
             }
         }

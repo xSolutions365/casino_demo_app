@@ -1,31 +1,73 @@
-This is a Kotlin Multiplatform project targeting Android, iOS.
+# 🎰 MyCasino Kotlin Multiplatform App
 
-* [/iosApp](./iosApp/iosApp) contains an iOS application. Even if you’re sharing your UI with Compose Multiplatform,
-  you need this entry point for your iOS app. This is also where you should add SwiftUI code for your project.
-
-* [/shared](./shared/src) is for code that will be shared across your Compose Multiplatform applications.
-  It contains several subfolders:
-  - [commonMain](./shared/src/commonMain/kotlin) is for code that’s common for all targets.
-  - Other folders are for Kotlin code that will be compiled for only the platform indicated in the folder name.
-    For example, if you want to use Apple’s CoreCrypto for the iOS part of your Kotlin app,
-    the [iosMain](./shared/src/iosMain/kotlin) folder would be the right place for such calls.
-    Similarly, if you want to edit the Desktop (JVM) specific part, the [jvmMain](./shared/src/jvmMain/kotlin)
-    folder is the appropriate location.
-
-### Running the apps
-
-Use the run configurations provided by the run widget in your IDE's toolbar. You can also use these commands and options:
-
-- Android app: `./gradlew :androidApp:assembleDebug`
-- iOS app: open the [/iosApp](./iosApp) directory in Xcode and run it from there.
-
-### Running tests
-
-Use the run button in your IDE's editor gutter, or run tests using Gradle tasks:
-
-- Android tests: `./gradlew :shared:testAndroidHostTest`
-- iOS tests: `./gradlew :shared:iosSimulatorArm64Test`
+**Kotlin Multiplatform (KMP)** mobile application built for Android and iOS. This project demonstrates strict separation of concerns, decoupling of platform layers, and an advanced **Server-Driven UI (SDUI) Card Architecture**.
 
 ---
 
-Learn more about [Kotlin Multiplatform](https://www.jetbrains.com/help/kotlin-multiplatform-dev/get-started.html)…
+## 🛠️ Tech Stack & Architecture Libraries
+
+The application uses an entirely shared business logic engine combined with a declarative UI layer:
+
+*   **UI Framework:** [Compose Multiplatform]
+*   **Networking:** [Ktor Client](https://ktor.io) with a specialized `MockEngine` for deterministic and robust JSON API stream responses.
+*   **Local Caching:** [SQLDelight](https://github.io) for type-safe, multiplatform SQLite database storage.
+*   **Dependency Injection:** [Koin](https://insert-koin.io) to manage native constructor-based DI across repositories, use cases, and ViewModels.
+*   **Serialization:** [Kotlinx Serialization] for type-safe JSON payloads and argument navigation routes.
+*   **Navigation:** `androidx.navigation:navigation-compose` for structural type-safe path control.
+*   **Analytics:** [Analytics provider]
+
+---
+
+## 🏗️ Architectural Pattern
+
+The project strictly follows **Clean Architecture principles** and **Separation of Concerns**. Code is isolated into a **layered feature-driven structure** within the `shared` module, ensuring that components are independently testable and completely swappable.
+
+### Core Architecture Rules:
+1. **Domain Layer (The Brain):** Pure Kotlin logic. It defines business entities and Use Cases, and it is **completely unaware** of UI libraries or remote source frameworks (no Ktor or DB imports).
+2. **Data Layer (The Source):** Implements the repository contracts defined by the Domain Layer. It orchestrates local caching (SQLDelight) and remote network endpoints (Ktor).
+3. **Presentation Layer (The State Machine):** Houses `ViewModels` and descriptive `UiState` objects. ViewModels expose state streams observed reactively by the Compose UI.
+
+---
+
+## 📂 Project Directory Structure
+
+```text
+shared/
+├── src/commonMain/kotlin/com/example/mycasino/
+│   ├── core/                      # Core infrastructure & global definitions
+│   │   ├── network/               # Ktor HttpClient configurations & MockEngine setup
+│   │   ├── database/              # SQLDelight database drivers and schema configurations
+│   │   └── presentation/          # Global UI contracts, state objects, and layout factories
+│   │
+│   ├── di/                        # App-wide Koin Dependency Injection modules
+│   │
+│   └── feature/                   # Feature-driven modules (Enforcing Clean Architecture)
+│       ├── auth/                  # Unified Authentication Feature
+│       │   ├── data/              # AuthRepositoryImpl, Request/Response DTOs
+│       │   ├── domain/            # User model, Login/Register UseCases, Repository Interfaces
+│       │   └── presentation/      # LoginScreen, RegisterScreen, AuthViewModel, AuthState
+│       │
+│       └── lobby/                 # Dynamic Casino Lobby orchestration
+│           ├── domain/            # Layout contracts & Layout-fetching UseCases
+│           ├── presentation/      # Orchestrated LobbyScreen, Master Layout ViewModel
+│           │
+│           └── slots/             # Independent Slots Card feature (Micro-architecture)
+│               ├── data/          # SlotsRepositoryImpl hitting specific sub-endpoints
+│               ├── domain/        # Slots business rules & UseCases
+│               └── presentation/  # SlotsCardComponent, SlotsCardViewModel, Slots UI Card
+```
+
+---
+
+## 🎴 Advanced Feature: The Card Architecture (Server-Driven UI)
+
+To ensure team scalability and isolated crash boundaries, the casino lobby utilizes a custom **Card Architecture**. 
+
+Instead of treating the home screen as a rigid, monolithic data model, the lobby behaves as a **dynamic orchestrator of independent micro-features**.
+
+![Login Screen](screenshots/screenshot_1.png)
+
+![Lobby Screen](screenshots/screenshot_2.png)
+
+
+

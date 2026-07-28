@@ -4,5 +4,5 @@ import com.example.mycasino.feature.auth.domain.models.User
 import com.example.mycasino.feature.auth.domain.repository.AuthRepository
 
 class LoginUseCase(private val repository: AuthRepository) {
-    suspend operator fun invoke(email: String, password: String): User? = repository.login(email, password)
+    suspend operator fun invoke(email: String): User? = repository.login(email)
 }
